@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= theme %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Profile</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-layout">
+  <%- include('partials/sidebar', { folder: 'contacts', phones, counts, activePhoneId, theme }) %>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="javascript:history.back()" class="back-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:15px;height:15px"><polyline points="15,18 9,12 15,6"/></svg>
+          Back
+        </a>
+        <h2 class="topbar-title">Contact Profile</h2>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" id="themeToggle"><span class="theme-sun">☀️</span><span class="theme-moon">🌙</span></button>
+      </div>
+    </header>
+
+    <div class="settings-wrap">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success"><%= success %></div>
+      <% } %>
+
+      <!-- Profile Card -->
+      <section class="settings-block">
+        <div class="profile-card">
+          <div class="profile-avatar profile-avatar-lg">
+            <%= (contact ? contact.name : (registeredUser ? registeredUser.display_name : phone)).charAt(0).toUpperCase() %>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">
+              <% if (contact) { %>
+                <%= contact.name %>
+              <% } else if (registeredUser) { %>
+                <%= registeredUser.display_name || registeredUser.username %>
+              <% } else { %>
+                <%= phone %>
+              <% } %>
+            </div>
+            <div class="profile-phone">📱 <%= phone %></div>
+            <% if (registeredUser) { %>
+            <div class="profile-sub">TextBox user: @<%= registeredUser.username %></div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Save / Edit contact form -->
+        <form method="POST" action="/contacts/save" class="settings-form" style="margin-top:1.25rem">
+          <input type="hidden" name="phone_number" value="<%= phone %>">
+          <input type="hidden" name="redirect_to" value="/profile/<%= encodeURIComponent(phone) %>">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label"><%= contact ? 'Edit Name' : 'Save as Contact' %></label>
+              <input class="field-input" type="text" name="name"
+                value="<%= contact ? contact.name : (registeredUser ? (registeredUser.display_name || registeredUser.username) : '') %>"
+                placeholder="Contact name" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <%= contact ? 'Update Contact' : 'Save Contact' %>
+          </button>
+          <% if (contact) { %>
+          <form method="POST" action="/contacts/delete" style="display:inline;margin-left:.5rem"
+                onsubmit="return confirm('Remove this contact?')">
+            <input type="hidden" name="contact_id" value="<%= contact.id %>">
+            <button type="submit" class="btn btn-danger">Remove</button>
+          </form>
+          <% } %>
+        </form>
+      </section>
+
+      <!-- Conversations -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Conversations
+        </h3>
+        <% if (conversations.length === 0) { %>
+        <p class="block-desc">No conversations with this contact yet.</p>
+        <% } else { %>
+        <ul class="conv-list">
+          <% conversations.forEach(conv => { %>
+          <li class="conv-item">
+            <a href="/conversation/<%= conv.id %>" class="conv-link">
+              <div class="conv-avatar"><%= (conv.contact_name || phone).charAt(0).toUpperCase() %></div>
+              <div class="conv-info">
+                <div class="conv-row1">
+                  <span class="conv-name">
+                    <%= conv.status === 'inbox' ? 'Inbox' : conv.status === 'spam' ? 'Spam' : 'Trash' %>
+                    <% if (conv.subject) { %> — <%= conv.subject %><% } %>
+                  </span>
+                  <span class="conv-time"><%= new Date(conv.last_message_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></span>
+                </div>
+                <div class="conv-preview"><%= conv.last_message ? conv.last_message.substring(0,80) : 'No messages' %></div>
+              </div>
+            </a>
+          </li>
+          <% }) %>
+        </ul>
+        <% } %>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/js/app.js"></script>
+  <script>
+    window.TB = { myPhone: '<%= typeof activePhone !== "undefined" && activePhone ? activePhone : "" %>' };
+  </script>
+</body>
+</html>

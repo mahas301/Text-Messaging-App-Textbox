@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= theme %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Settings</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-layout">
+  <%- include('partials/sidebar', { folder: 'settings', phones, counts, activePhoneId, theme }) %>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Settings</h2>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <span class="theme-sun">☀️</span><span class="theme-moon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="settings-wrap">
+      <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+      <% if (error)   { %><div class="alert alert-error"><%= error %></div><% } %>
+
+      <!-- ── PROFILE ────────────────────────────────────── -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Profile
+        </h3>
+        <div class="profile-card">
+          <div class="profile-avatar"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+          <div class="profile-info">
+            <div class="profile-name"><%= user.displayName || user.username %></div>
+            <div class="profile-sub">@<%= user.username %></div>
+            <% if (activePhone) { %>
+            <div class="profile-phone">📱 <%= activePhone %></div>
+            <% } %>
+          </div>
+        </div>
+        <form method="POST" action="/settings/update-profile" class="settings-form">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Username</label>
+              <input class="field-input" type="text" value="<%= user.username %>" disabled>
+            </div>
+            <div class="field">
+              <label class="field-label">Display Name</label>
+              <input class="field-input" type="text" name="display_name" value="<%= user.displayName || '' %>" placeholder="Your name">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Profile</button>
+        </form>
+      </section>
+
+      <!-- ── THEME ──────────────────────────────────────── -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          Appearance
+        </h3>
+        <div class="theme-selector">
+          <button class="theme-card <%= theme === 'dark' ? 'theme-card-active' : '' %>" onclick="setTheme('dark')">
+            <div class="theme-preview theme-preview-dark">
+              <div class="tp-sidebar"></div>
+              <div class="tp-main"><div class="tp-bubble tp-out"></div><div class="tp-bubble tp-in"></div></div>
+            </div>
+            <span>Dark</span>
+          </button>
+          <button class="theme-card <%= theme === 'light' ? 'theme-card-active' : '' %>" onclick="setTheme('light')">
+            <div class="theme-preview theme-preview-light">
+              <div class="tp-sidebar"></div>
+              <div class="tp-main"><div class="tp-bubble tp-out"></div><div class="tp-bubble tp-in"></div></div>
+            </div>
+            <span>Light</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── PHONE NUMBERS ──────────────────────────────── -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          Phone Numbers
+        </h3>
+        <p class="block-desc">All numbers are linked to your account. Each has its own inbox, spam, and trash.</p>
+        <ul class="phone-list">
+          <% phones.forEach(p => { %>
+          <li class="phone-row <%= p.id == activePhoneId ? 'phone-active' : '' %>">
+            <div class="phone-info">
+              <span class="phone-tag"><%= p.label %></span>
+              <span class="phone-num"><%= p.phone_number %></span>
+              <% if (p.id == activePhoneId) { %><span class="active-pill">● Active</span><% } %>
+            </div>
+            <div class="phone-acts">
+              <% if (p.id != activePhoneId) { %>
+              <form method="POST" action="/settings/switch-phone">
+                <input type="hidden" name="phone_id" value="<%= p.id %>">
+                <button class="btn btn-ghost btn-sm">Switch to this</button>
+              </form>
+              <% } %>
+              <% if (phones.length > 1) { %>
+              <form method="POST" action="/settings/delete-phone" onsubmit="return confirm('Remove this number?')">
+                <input type="hidden" name="phone_id" value="<%= p.id %>">
+                <button class="btn btn-danger btn-sm">Remove</button>
+              </form>
+              <% } %>
+            </div>
+          </li>
+          <% }) %>
+        </ul>
+        <div class="block-divider"></div>
+        <h4 class="block-sub">Add a Phone Number</h4>
+        <form method="POST" action="/settings/add-phone" class="settings-form">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Phone Number</label>
+              <input class="field-input" type="tel" name="phone_number" placeholder="+1 555 000 0000" required>
+            </div>
+            <div class="field">
+              <label class="field-label">Label</label>
+              <input class="field-input" type="text" name="label" placeholder="Work, Personal…">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Number</button>
+        </form>
+      </section>
+
+      <!-- ── CONTACTS ───────────────────────────────────── -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Saved Contacts
+        </h3>
+        <% if (contacts && contacts.length > 0) { %>
+        <ul class="contact-list">
+          <% contacts.forEach(c => { %>
+          <li class="contact-row">
+            <div class="contact-av"><%= c.name.charAt(0).toUpperCase() %></div>
+            <div class="contact-info">
+              <span class="contact-name"><%= c.name %></span>
+              <span class="contact-num"><%= c.phone_number %></span>
+            </div>
+            <div class="contact-acts">
+              <a href="/profile/<%= encodeURIComponent(c.phone_number) %>" class="btn btn-ghost btn-sm">View</a>
+              <form method="POST" action="/contacts/delete" onsubmit="return confirm('Remove contact?')">
+                <input type="hidden" name="contact_id" value="<%= c.id %>">
+                <button class="btn btn-danger btn-sm">Remove</button>
+              </form>
+            </div>
+          </li>
+          <% }) %>
+        </ul>
+        <div class="block-divider"></div>
+        <% } else { %>
+        <p class="block-desc">No saved contacts yet. Save a contact from any conversation.</p>
+        <% } %>
+        <h4 class="block-sub">Add Contact</h4>
+        <form method="POST" action="/contacts/save" class="settings-form">
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Name</label>
+              <input class="field-input" type="text" name="name" placeholder="Contact name" required>
+            </div>
+            <div class="field">
+              <label class="field-label">Phone Number</label>
+              <input class="field-input" type="tel" name="phone_number" placeholder="+1 555 000 0000" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Contact</button>
+        </form>
+      </section>
+
+      <!-- ── ACCOUNT ────────────────────────────────────── -->
+      <section class="settings-block">
+        <h3 class="block-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="block-ico"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Account
+        </h3>
+        <div class="info-card">
+          <p>Signed in as <strong><%= user.username %></strong>.</p>
+          <p style="margin-top:.4rem;font-size:.82rem;color:var(--text-3)">OTP login is available on the sign-in page. OTPs are printed in the server console (no SMS required for testing).</p>
+        </div>
+        <form method="POST" action="/logout" style="margin-top:1rem">
+          <button type="submit" class="btn btn-danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/js/app.js"></script>
+  <script>
+    window.TB = { myPhone: '<%= typeof activePhone !== "undefined" && activePhone ? activePhone : "" %>' };
+
+    function setTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('tb-theme', t);
+      fetch('/theme-toggle', { method: 'POST' }).catch(() => {});
+      document.querySelectorAll('.theme-card').forEach((el, i) => {
+        el.classList.toggle('theme-card-active', (i === 0 && t === 'dark') || (i === 1 && t === 'light'));
+      });
+    }
+  </script>
+</body>
+</html>

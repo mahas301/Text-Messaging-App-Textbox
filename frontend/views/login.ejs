@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Sign In</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">✉</div>
+      <h1 class="auth-logo-name">TextBox</h1>
+      <p class="auth-tagline">Real-time messaging, structured like email.</p>
+    </div>
+
+    <div class="auth-card">
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab <%= !otpSent ? 'active' : '' %>" onclick="showTab('pw')">Username</button>
+        <button class="auth-tab <%= otpSent ? 'active' : '' %>" onclick="showTab('otp')">Phone OTP</button>
+      </div>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (typeof info !== 'undefined' && info) { %><div class="alert alert-info"><%= info %></div><% } %>
+
+      <!-- Username + Password -->
+      <div id="tab-pw" class="tab-panel" style="<%= otpSent ? 'display:none' : '' %>">
+        <form method="POST" action="/login" class="auth-form">
+          <div class="field">
+            <label class="field-label">Username</label>
+            <input class="field-input" type="text" name="username" placeholder="your username" autofocus>
+          </div>
+          <div class="field">
+            <label class="field-label">Password</label>
+            <input class="field-input" type="password" name="password" placeholder="••••••••">
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+        </form>
+      </div>
+
+      <!-- Phone OTP -->
+      <div id="tab-otp" class="tab-panel" style="<%= otpSent ? '' : 'display:none' %>">
+        <% if (!otpSent) { %>
+        <!-- Step 1: enter phone -->
+        <form method="POST" action="/login/otp/request" class="auth-form">
+          <div class="field">
+            <label class="field-label">Phone Number</label>
+            <input class="field-input" type="tel" name="phone" placeholder="+1 555 000 0000">
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Send OTP</button>
+          <p class="otp-note">📋 OTP will appear in the server terminal (console) — no SMS needed for testing.</p>
+        </form>
+        <% } else { %>
+        <!-- Step 2: enter OTP -->
+        <form method="POST" action="/login/otp/verify" class="auth-form">
+          <input type="hidden" name="phone" value="<%= otpPhone %>">
+          <div class="field">
+            <label class="field-label">Phone Number</label>
+            <input class="field-input" type="text" value="<%= otpPhone %>" disabled>
+          </div>
+          <div class="field">
+            <label class="field-label">Enter OTP</label>
+            <input class="field-input otp-input" type="text" name="otp" placeholder="6-digit code"
+              maxlength="6" inputmode="numeric" autofocus>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Verify & Sign In</button>
+          <a href="/login" class="otp-resend">← Try a different number</a>
+        </form>
+        <% } %>
+      </div>
+
+      <p class="auth-switch">No account? <a href="/register">Create one →</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Apply saved theme
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('tb-theme') || 'dark');
+
+    function showTab(tab) {
+      document.getElementById('tab-pw').style.display  = tab === 'pw'  ? '' : 'none';
+      document.getElementById('tab-otp').style.display = tab === 'otp' ? '' : 'none';
+      document.querySelectorAll('.auth-tab').forEach((b, i) => {
+        b.classList.toggle('active', (tab === 'pw' && i === 0) || (tab === 'otp' && i === 1));
+      });
+    }
+    // Show OTP tab if otpSent
+    <% if (otpSent) { %>showTab('otp');<% } %>
+  </script>
+</body>
+</html>

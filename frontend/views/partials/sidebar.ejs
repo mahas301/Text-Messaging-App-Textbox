@@ -1,0 +1,79 @@
+<aside class="sidebar" id="appSidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="brand-mark">✉</div>
+    <span class="brand-text">TextBox</span>
+  </div>
+
+  <!-- Active Number chip -->
+  <% if (typeof phones !== 'undefined' && phones.length > 0) {
+       const active = phones.find(p => p.id == activePhoneId);
+       if (active) { %>
+  <div class="active-chip">
+    <span class="chip-dot" id="myStatusDot" title="You are online"></span>
+    <div class="chip-info">
+      <span class="chip-label"><%= active.label %></span>
+      <span class="chip-number"><%= active.phone_number %></span>
+    </div>
+  </div>
+  <% } } %>
+
+  <!-- Nav -->
+  <nav class="sidebar-nav">
+    <a href="/inbox" class="nav-link <%= (typeof folder !== 'undefined' && folder === 'inbox') ? 'active' : '' %>">
+      <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+      <span>Inbox</span>
+      <% if (typeof counts !== 'undefined' && counts.inbox > 0) { %>
+      <span class="nav-badge" id="inboxBadge"><%= counts.inbox %></span>
+      <% } else { %>
+      <span class="nav-badge hidden" id="inboxBadge">0</span>
+      <% } %>
+    </a>
+    <a href="/spam" class="nav-link <%= (typeof folder !== 'undefined' && folder === 'spam') ? 'active' : '' %>">
+      <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      <span>Spam</span>
+      <% if (typeof counts !== 'undefined' && counts.spam > 0) { %>
+      <span class="nav-badge"><%= counts.spam %></span>
+      <% } %>
+    </a>
+    <a href="/trash" class="nav-link <%= (typeof folder !== 'undefined' && folder === 'trash') ? 'active' : '' %>">
+      <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6M9,6V4h6v2"/></svg>
+      <span>Trash</span>
+    </a>
+    <a href="/contacts" class="nav-link <%= (typeof folder !== 'undefined' && folder === 'contacts') ? 'active' : '' %>">
+      <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Contacts</span>
+    </a>
+  </nav>
+
+  <!-- Phone switcher (only if multiple numbers) -->
+  <% if (typeof phones !== 'undefined' && phones.length > 1) { %>
+  <div class="sidebar-switcher">
+    <p class="switcher-label">Active number</p>
+    <form method="POST" action="/settings/switch-phone">
+      <select name="phone_id" class="switcher-select" onchange="this.form.submit()">
+        <% phones.forEach(p => { %>
+        <option value="<%= p.id %>" <%= p.id == activePhoneId ? 'selected' : '' %>><%= p.label %>: <%= p.phone_number %></option>
+        <% }) %>
+      </select>
+    </form>
+  </div>
+  <% } %>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <a href="/settings" class="nav-link <%= (typeof folder !== 'undefined' && folder === 'settings') ? 'active' : '' %>">
+      <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06-.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Settings</span>
+    </a>
+    <form method="POST" action="/logout">
+      <button type="submit" class="nav-link logout-link">
+        <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sign Out</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Drag handle for resizing -->
+  <div class="sidebar-resizer" id="sidebarResizer" title="Drag to resize"></div>
+</aside>

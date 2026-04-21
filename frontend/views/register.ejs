@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Register</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">✉</div>
+      <h1 class="auth-logo-name">TextBox</h1>
+      <p class="auth-tagline">Real-time messaging, structured like email.</p>
+    </div>
+    <div class="auth-card">
+      <h2 class="auth-title">Create Account</h2>
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <form method="POST" action="/register" class="auth-form">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Username <span class="req">*</span></label>
+            <input class="field-input" type="text" name="username" placeholder="choose a username" required>
+          </div>
+          <div class="field">
+            <label class="field-label">Display Name</label>
+            <input class="field-input" type="text" name="display_name" placeholder="your name">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Password <span class="req">*</span></label>
+          <input class="field-input" type="password" name="password" placeholder="••••••••" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Phone Number <span class="req">*</span></label>
+            <input class="field-input" type="tel" name="phone_number" placeholder="+1 555 000 0000" required>
+          </div>
+          <div class="field">
+            <label class="field-label">Label</label>
+            <input class="field-input" type="text" name="phone_label" placeholder="Personal">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+      </form>
+      <p class="auth-switch">Already have an account? <a href="/login">Sign in →</a></p>
+    </div>
+  </div>
+  <script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('tb-theme') || 'dark');
+  </script>
+</body>
+</html>

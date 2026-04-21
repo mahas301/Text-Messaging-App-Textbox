@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= theme %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Contacts</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-layout">
+  <%- include('partials/sidebar', { folder: 'contacts', phones, counts, activePhoneId, theme }) %>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Contacts</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="text" id="contactSearch" placeholder="Search contacts…" oninput="filterContacts(this.value)">
+        </div>
+        <button class="theme-toggle" id="themeToggle"><span class="theme-sun">☀️</span><span class="theme-moon">🌙</span></button>
+        <button class="btn btn-primary" onclick="openAddContact()">+ Add Contact</button>
+      </div>
+    </header>
+
+    <div class="conv-panel" id="contactsPanel">
+      <% if (contacts.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-ico">👥</div>
+        <p class="empty-title">No contacts saved yet.</p>
+        <button class="btn btn-primary" onclick="openAddContact()">Add your first contact</button>
+      </div>
+      <% } else { %>
+      <ul class="contact-list-full" id="contactListFull">
+        <% contacts.forEach(c => { %>
+        <li class="contact-item" data-name="<%= c.name.toLowerCase() %>" data-phone="<%= c.phone_number %>">
+          <a href="/profile/<%= encodeURIComponent(c.phone_number) %>" class="contact-link">
+            <div class="conv-avatar contact-av-lg"><%= c.name.charAt(0).toUpperCase() %></div>
+            <div class="contact-detail">
+              <div class="contact-name-main"><%= c.name %></div>
+              <div class="contact-phone-main"><%= c.phone_number %></div>
+            </div>
+          </a>
+          <div class="conv-actions">
+            <a href="/conversation/new?to=<%= encodeURIComponent(c.phone_number) %>&name=<%= encodeURIComponent(c.name) %>"
+               class="act-btn" title="Message">💬</a>
+            <form method="POST" action="/contacts/delete" onsubmit="return confirm('Remove?')">
+              <input type="hidden" name="contact_id" value="<%= c.id %>">
+              <button type="submit" class="act-btn act-danger" title="Remove">✕</button>
+            </form>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- Add Contact Modal -->
+  <div class="modal-mask" id="addContactMask">
+    <div class="modal">
+      <div class="modal-hd">
+        <span class="modal-title">Add Contact</span>
+        <button class="modal-close" onclick="closeAddContact()">✕</button>
+      </div>
+      <form method="POST" action="/contacts/save" class="modal-body">
+        <input type="hidden" name="redirect_to" value="/contacts">
+        <div class="field">
+          <label class="field-label">Name</label>
+          <input class="field-input" type="text" name="name" placeholder="Contact name" required autofocus>
+        </div>
+        <div class="field">
+          <label class="field-label">Phone Number</label>
+          <input class="field-input" type="tel" name="phone_number" placeholder="+1 555 000 0000" required>
+        </div>
+        <div class="modal-ft">
+          <button type="button" class="btn btn-ghost" onclick="closeAddContact()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Contact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="/js/app.js"></script>
+  <script>
+    window.TB = { myPhone: '<%= typeof activePhone !== "undefined" && activePhone ? activePhone : "" %>' };
+
+    function openAddContact()  { document.getElementById('addContactMask').classList.add('open'); }
+    function closeAddContact() { document.getElementById('addContactMask').classList.remove('open'); }
+    document.addEventListener('click', e => { if (e.target === document.getElementById('addContactMask')) closeAddContact(); });
+
+    function filterContacts(q) {
+      const items = document.querySelectorAll('.contact-item');
+      const lq = q.toLowerCase();
+      items.forEach(item => {
+        const match = item.dataset.name.includes(lq) || item.dataset.phone.includes(lq);
+        item.style.display = match ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

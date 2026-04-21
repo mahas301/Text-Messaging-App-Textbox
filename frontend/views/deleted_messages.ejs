@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= theme %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – Deleted Messages</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-layout">
+  <%- include('partials/sidebar', { folder: 'inbox', phones, counts, activePhoneId, theme }) %>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/conversation/<%= conversation.id %>" class="back-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:15px;height:15px"><polyline points="15,18 9,12 15,6"/></svg>
+          Back
+        </a>
+        <h2 class="topbar-title">Deleted — <%= conversation.contact_name || conversation.contact_number %></h2>
+      </div>
+      <button class="theme-toggle" id="themeToggle">
+        <span class="theme-sun">☀️</span><span class="theme-moon">🌙</span>
+      </button>
+    </header>
+
+    <div class="conv-panel" style="padding: 1.5rem; overflow-y: auto;">
+      <% if (deletedMessages.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-ico">✅</div>
+        <p class="empty-title">No deleted messages.</p>
+      </div>
+      <% } else { %>
+      <p class="info-note">Messages you deleted from this conversation. Restore any of them.</p>
+      <div class="deleted-list">
+        <% deletedMessages.forEach(msg => { %>
+        <div class="deleted-card">
+          <div class="deleted-meta">
+            <span class="del-dir <%= msg.direction %>"><%= msg.direction === 'outbound' ? '↑ You sent' : '↓ Received' %></span>
+            <span class="del-time">Sent: <%= new Date(msg.created_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) %></span>
+            <span class="del-time">Deleted: <%= new Date(msg.deleted_at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) %></span>
+          </div>
+          <p class="deleted-body"><%= msg.body %></p>
+          <form method="POST" action="/message/<%= msg.id %>/restore">
+            <button type="submit" class="btn btn-ghost btn-sm">↩ Restore</button>
+          </form>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </main>
+
+  <script src="/js/app.js"></script>
+  <script>
+    window.TB = { myPhone: '<%= activePhone || "" %>' };
+  </script>
+</body>
+</html>

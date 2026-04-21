@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= theme %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextBox – <%= folder.charAt(0).toUpperCase()+folder.slice(1) %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-layout">
+  <%- include('partials/sidebar', { folder, phones, counts, activePhoneId, theme }) %>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title"><%= folder === 'inbox' ? 'Inbox' : folder === 'spam' ? 'Spam' : 'Trash' %></h2>
+      </div>
+      <div class="topbar-right">
+        <form method="GET" action="/<%= folder %>" class="search-form">
+          <div class="search-wrap">
+            <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" type="text" name="q" value="<%= search %>" placeholder="Search conversations…">
+          </div>
+        </form>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <span class="theme-sun">☀️</span><span class="theme-moon">🌙</span>
+        </button>
+        <% if (folder === 'inbox') { %>
+        <button class="btn btn-primary" onclick="openCompose()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Compose
+        </button>
+        <% } %>
+      </div>
+    </header>
+
+    <div class="conv-panel" id="convPanel">
+      <% if (conversations.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-ico"><%= folder==='inbox'?'📭':folder==='spam'?'🚫':'🗑️' %></div>
+        <p class="empty-title"><%= folder==='inbox'?'No messages yet':folder==='spam'?'No spam':'Trash is empty' %></p>
+        <% if (folder==='inbox') { %><button class="btn btn-primary" onclick="openCompose()">Start a conversation</button><% } %>
+      </div>
+      <% } else { %>
+      <ul class="conv-list" id="convList">
+        <% conversations.forEach(conv => { %>
+        <li class="conv-item <%= !conv.is_read ? 'unread' : '' %>" data-id="<%= conv.id %>" data-contact="<%= conv.contact_number %>">
+          <a href="/conversation/<%= conv.id %>" class="conv-link">
+            <div class="conv-avatar"><%= (conv.contact_name || conv.contact_number).charAt(0).toUpperCase() %></div>
+            <div class="conv-info">
+              <div class="conv-row1">
+                <span class="conv-name">
+                  <%= conv.contact_name || conv.contact_number %>
+                  <span class="online-dot hidden" id="dot-<%= conv.contact_number.replace(/\+/g,'p') %>"></span>
+                </span>
+                <span class="conv-time"><%= conv.last_message_at ? new Date(conv.last_message_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '' %></span>
+              </div>
+              <% if (conv.subject) { %><div class="conv-subject"><%= conv.subject %></div><% } %>
+              <div class="conv-preview" id="preview-<%= conv.id %>"><%= conv.last_message ? conv.last_message.substring(0,90)+(conv.last_message.length>90?'…':'') : 'No messages' %></div>
+            </div>
+          </a>
+          <div class="conv-actions">
+            <% if (folder !== 'spam') { %>
+            <form method="POST" action="/conversation/<%= conv.id %>/move"><input type="hidden" name="destination" value="spam"><button type="submit" class="act-btn" title="Spam">🚫</button></form>
+            <% } else { %>
+            <form method="POST" action="/conversation/<%= conv.id %>/move"><input type="hidden" name="destination" value="inbox"><button type="submit" class="act-btn" title="Not spam">✓</button></form>
+            <% } %>
+            <% if (folder !== 'trash') { %>
+            <form method="POST" action="/conversation/<%= conv.id %>/move"><input type="hidden" name="destination" value="trash"><button type="submit" class="act-btn" title="Delete">🗑</button></form>
+            <% } else { %>
+            <form method="POST" action="/conversation/<%= conv.id %>/move"><input type="hidden" name="destination" value="inbox"><button type="submit" class="act-btn" title="Restore">↩</button></form>
+            <form method="POST" action="/conversation/<%= conv.id %>/delete-permanent" onsubmit="return confirm('Permanently delete?')"><button type="submit" class="act-btn act-danger" title="Delete forever">✕</button></form>
+            <% } %>
+          </div>
+        </li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- Compose Modal -->
+  <div class="modal-mask" id="composeMask">
+    <div class="modal">
+      <div class="modal-hd">
+        <span class="modal-title">New Message</span>
+        <button class="modal-close" onclick="closeCompose()">✕</button>
+      </div>
+      <form method="POST" action="/conversation/new" class="modal-body">
+        <div class="field">
+          <label class="field-label">To (phone number)</label>
+          <input class="field-input" type="tel" name="contact_number" placeholder="+1 555 000 0000" required>
+        </div>
+        <div class="field">
+          <label class="field-label">Contact Name <span class="opt">(optional)</span></label>
+          <input class="field-input" type="text" name="contact_name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label class="field-label">Subject <span class="opt">(optional)</span></label>
+          <input class="field-input" type="text" name="subject" placeholder="What's this about?">
+        </div>
+        <div class="field">
+          <label class="field-label">
+            Message
+            <span class="char-counter" id="composeCounter">0 / 500</span>
+          </label>
+          <textarea class="field-input field-textarea" name="body" id="composeBody" rows="4"
+            placeholder="Type your message…" maxlength="500" required
+            oninput="updateCounter('composeBody','composeCounter')"></textarea>
+        </div>
+        <div class="emoji-strip" id="composeEmojis"></div>
+        <div class="modal-ft">
+          <button type="button" class="btn btn-ghost" onclick="closeCompose()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    // Pass server data to JS
+    window.TB = {
+      myPhone: '<%= activePhone || "" %>',
+      folder:  '<%= folder %>'
+    };
+    initSocket();
+  </script>
+</body>
+</html>
