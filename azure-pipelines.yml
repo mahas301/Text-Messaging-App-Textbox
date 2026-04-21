@@ -9,9 +9,9 @@ steps:
 - checkout: self
 
 # Step 2: Install Node.js
-- task: NodeTool@0
+- task: UseNode@1
   inputs:
-    versionSpec: '18.x'
+    version: '18.x'
   displayName: "Install Node.js"
 
 # Step 3: Install dependencies
@@ -19,7 +19,7 @@ steps:
     npm install
   displayName: "Install dependencies"
 
-# Step 4: Run a test script (basic check)
+# Step 4: Run a test script
 - script: |
     echo "TextBox app pipeline is working 🚀"
   displayName: "Run a test script"
