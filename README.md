@@ -1,26 +1,5 @@
-# TextBox v4 📬
+# TextBox 
 ### Real-time SMS-style messaging — Node.js · Express · MySQL · Socket.IO
-
----
-
-## What's in v4
-
-| Feature | Status |
-|---|---|
-| BUG FIX: `activePhone` not defined in settings | ✅ Fixed |
-| Full Settings page (profile, theme, phones, contacts, logout) | ✅ |
-| Contact Management (save, edit, delete contacts) | ✅ |
-| Contact names shown in conversations & inbox | ✅ |
-| "Save Contact" button inside conversation | ✅ |
-| Profile page (`/profile/:phone`) | ✅ |
-| Contacts list page (`/contacts`) | ✅ |
-| Draggable sidebar resize (saved to localStorage) | ✅ |
-| Visual theme selector (dark/light cards in settings) | ✅ |
-| Socket.IO real-time messaging | ✅ |
-| Typing indicator | ✅ |
-| Online/offline status | ✅ |
-| Phone OTP login (console-logged) | ✅ |
-| Earthy brown theme, dark + light | ✅ |
 
 ---
 
@@ -135,16 +114,3 @@ textbox_clean/
         ├── css/style.css          ← Full earthy brown + all components
         └── js/app.js              ← Socket.IO + sidebar resize + all UI
 ```
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `activePhone is not defined` | Fixed in this version — settings route now always passes it |
-| Login server error | Check XAMPP MySQL is running + DB_PASSWORD in .env |
-| Contacts table missing | Run the `CREATE TABLE IF NOT EXISTS contacts` SQL above |
-| Real-time not working | Check browser console for Socket.IO connection errors |
-| Sidebar won't resize | Try a hard refresh (Ctrl+Shift+R) to clear cached JS |
-| OTP not showing | Look in the VS Code terminal (not the browser) |
