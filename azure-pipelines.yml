@@ -2,7 +2,7 @@ trigger:
 - main  # runs when you push to main branch
 
 pool:
-  vmImage: ubuntu-latest  # use Ubuntu agent
+  name: Default
 
 steps:
 # Step 1: Checkout code
