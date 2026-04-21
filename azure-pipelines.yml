@@ -1,0 +1,25 @@
+trigger:
+- main  # runs when you push to main branch
+
+pool:
+  vmImage: ubuntu-latest  # use Ubuntu agent
+
+steps:
+# Step 1: Checkout code
+- checkout: self
+
+# Step 2: Install Node.js
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: "Install Node.js"
+
+# Step 3: Install dependencies
+- script: |
+    npm install
+  displayName: "Install dependencies"
+
+# Step 4: Run a test script (basic check)
+- script: |
+    echo "TextBox app pipeline is working 🚀"
+  displayName: "Run a test script"
